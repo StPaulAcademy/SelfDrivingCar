@@ -1,4 +1,4 @@
-Advanced Technology Projects 2016, St. Paul Academy
+Advanced Technology Projects Fall 2017, St. Paul Academy
 --------------------------------
 Self-Driving, 3d printed car programmed with tensorflow
 
