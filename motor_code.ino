@@ -12,17 +12,22 @@ void setup() {
 }
 
 void loop() {
-  while (Serial.available() > 4){
+  while (Serial.available() > 0){
+    int mtr = Serial.parseInt();
     int spd = Serial.parseInt();
     int dir = Serial.parseInt();
     int turn = Serial.parseInt();
-    myMotor->setSpeed(spd);
-    servo1.write(turn);
-    if (dir == 1){
-      myMotor->run(FORWARD);
+    if (mtr == 0){
+      servo1.write(turn);
       }
-    if (dir == 0){
-      myMotor->run(BACKWARD);
-      } 
-    } 
-  }
+    if (mtr==1){
+      myMotor->setSpeed(spd);
+      if (dir == 1){
+        myMotor->run(FORWARD);
+        }
+      if (dir == 0){
+        myMotor->run(BACKWARD);
+        }
+      }
+    }
+}
