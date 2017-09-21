@@ -17,42 +17,17 @@ void loop() {
   if (Serial.available() > 0){
     command = Serial.parseInt();
     do_commands(command);
-    }
-  delay(50);
+    }  
   }
 
 void forward(){
   myMotor->setSpeed(255);
   myMotor->run(FORWARD);
   }
-
-void forward_right(){
-  myMotor->setSpeed(255);
-  myMotor->run(FORWARD);
-  servo1.write(45);
-  }
-
-void forward_left(){
-  myMotor->setSpeed(255);
-  myMotor->run(FORWARD);
-  servo1.write(135);
-  }
   
 void backward(){
   myMotor->setSpeed(255);
   myMotor->run(BACKWARD);
-  }
-
-void backward_right(){
-  myMotor->setSpeed(255);
-  myMotor->run(BACKWARD);
-  servo1.write(45);
-  }
-
-void backward_left(){
-  myMotor->setSpeed(255);
-  myMotor->run(BACKWARD);
-  servo1.write(135);
   }
 
 void right(){
@@ -61,6 +36,10 @@ void right(){
 
 void left(){
   servo1.write(135);
+  }
+
+void center(){
+  servo1.write(90);
   }
 
 void stopped(){
@@ -75,12 +54,6 @@ void do_commands(int command){
     case 2: backward(); break;
     case 3: right(); break;
     case 4: left(); break;
-
-    case 5: forward_right(); break;
-    case 6: forward_left(); break;
-    case 7: backward_right(); break;
-    case 8: backward_left(); break;
-
-    //default: Serial.print("Enter a valid command");
+    case 5: center(); break;
     }
   }
