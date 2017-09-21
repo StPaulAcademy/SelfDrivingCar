@@ -3,31 +3,84 @@
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 Adafruit_DCMotor *myMotor = AFMS.getMotor(1);
 Servo servo1;
+int command = 0;
 
 void setup() {
   AFMS.begin();
   myMotor->setSpeed(0);
   servo1.attach(9);
   Serial.begin(9600);
+  Serial.setTimeout(100);
 }
 
 void loop() {
-  while (Serial.available() > 0){
-    int mtr = Serial.parseInt();
-    int spd = Serial.parseInt();
-    int dir = Serial.parseInt();
-    int turn = Serial.parseInt();
-    if (mtr == 0){
-      servo1.write(turn);
-      }
-    if (mtr==1){
-      myMotor->setSpeed(spd);
-      if (dir == 1){
-        myMotor->run(FORWARD);
-        }
-      if (dir == 0){
-        myMotor->run(BACKWARD);
-        }
-      }
+  if (Serial.available() > 0){
+    command = Serial.parseInt();
+    do_commands(command);
     }
-}
+  delay(50);
+  }
+
+void forward(){
+  myMotor->setSpeed(255);
+  myMotor->run(FORWARD);
+  }
+
+void forward_right(){
+  myMotor->setSpeed(255);
+  myMotor->run(FORWARD);
+  servo1.write(45);
+  }
+
+void forward_left(){
+  myMotor->setSpeed(255);
+  myMotor->run(FORWARD);
+  servo1.write(135);
+  }
+  
+void backward(){
+  myMotor->setSpeed(255);
+  myMotor->run(BACKWARD);
+  }
+
+void backward_right(){
+  myMotor->setSpeed(255);
+  myMotor->run(BACKWARD);
+  servo1.write(45);
+  }
+
+void backward_left(){
+  myMotor->setSpeed(255);
+  myMotor->run(BACKWARD);
+  servo1.write(135);
+  }
+
+void right(){
+  servo1.write(45);
+  }
+
+void left(){
+  servo1.write(135);
+  }
+
+void stopped(){
+  myMotor->setSpeed(0);
+  servo1.write(90);
+  }
+
+void do_commands(int command){
+  switch (command){
+    case 0: stopped(); break;
+    case 1: forward(); break;
+    case 2: backward(); break;
+    case 3: right(); break;
+    case 4: left(); break;
+
+    case 5: forward_right(); break;
+    case 6: forward_left(); break;
+    case 7: backward_right(); break;
+    case 8: backward_left(); break;
+
+    //default: Serial.print("Enter a valid command");
+    }
+  }
