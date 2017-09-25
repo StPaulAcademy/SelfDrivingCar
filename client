@@ -41,7 +41,6 @@ def right(event):
     time.sleep(.060)
     
 def quit_client():
-    s.send(b'0')
     s.send(b'6')
     s.close()
     root.destroy()
