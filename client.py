@@ -69,6 +69,6 @@ class Client:
         self.master.destroy()
 
 root = tk.Tk()
-gui = Client(root, '10.2.22.117', 1337)
+gui = Client(root, '10.2.22.117', 1338)
 root.mainloop()
         
