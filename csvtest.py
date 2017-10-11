@@ -15,8 +15,9 @@ def write():
         writer.writerow([i])
     
 def read():
-    moves = np.genfromtxt("test.csv", delimiter=',')
+    moves = np.genfromtxt("D:/moves.csv", delimiter=',')
     print(moves)
-write()
-read()
 
+read()
+data = b'3'
+print(str(data)[2])

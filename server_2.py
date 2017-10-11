@@ -40,9 +40,9 @@ while True:
         break
     else:
         ser.write(data)
-        moves.writerow([str(data)])
-        if data != "b'0'":
-            camera.capture("/mnt/usb/img/" +str(x) + ".jpg")
+        moves_csv.writerow([str(data)[2]])
+        if data != b'0':
+            camera.capture("/mnt/usb/img/" + str(x) + ".jpg")
             x += 1
         print(data, x)
 #    data2 = data
