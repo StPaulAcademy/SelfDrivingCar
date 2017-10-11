@@ -8,7 +8,7 @@ import csv
 
 camera = picamera.PiCamera()
 
-moves = open('moves.csv', 'w')
+moves = open('moves.csv', 'w', newline='')
 moves_csv = csv.writer(moves)
 
 HOST = ''
