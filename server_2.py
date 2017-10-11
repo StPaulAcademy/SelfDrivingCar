@@ -5,15 +5,14 @@ import serial
 import picamera
 import csv
 
-with picamera.PiCamera() as camera:
-    camera.resolution = (150, 150)
-    time.sleep(2)
+
+camera = picamera.PiCamera()
+
 moves = open('moves.csv', 'w')
 moves_csv = csv.writer(moves)
 
-
 HOST = ''
-PORT = 1338
+PORT = 1337
 ser = serial.Serial('/dev/ttyACM0', 9600)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
@@ -26,12 +25,11 @@ x = 0
 data2 = 0
 while True:
     data = conn.recv(1)
-    if data == data2:
-        with picamera.PiCamera() as camera:
-            camera.capture("/mnt/usb/img/" + str(x) + ".jpg")
-        x += 1
-        moves.write(str(data2) + ', ' )
-        continue
+#    if data == data2:
+#        camera.capture("/mnt/usb/img/" + str(x) + ".jpg")
+#        x += 1
+#        moves.write(str(data2) + ', ' )
+#        continue
     if not data: break
     if data == b'7':
         ser.write(b'0')
@@ -42,9 +40,9 @@ while True:
         break
     else:
         ser.write(data)
-        moves.write(str(data)+', ')
-        with picamera.PiCamera() as camera:
+        moves.writerow([str(data)])
+        if data != "b'0'":
             camera.capture("/mnt/usb/img/" +str(x) + ".jpg")
             x += 1
-    data2 = data
-	
+        print(data, x)
+#    data2 = data
