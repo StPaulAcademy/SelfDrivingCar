@@ -37,38 +37,46 @@ class Client:
             
     def center(self, event):
         self.s.send(b'0')
-        time.sleep(.10)
+        self.s.recv(1)
+        time.sleep(.1)
         
     def forward(self, event):
         self.s.send(b'4')
-        time.sleep(.10)
+        self.s.recv(1)
+        time.sleep(.1)
         
     def f_right(self, event):
         self.s.send(b'6')
-        time.sleep(.10)
+        self.s.recv(1)
+        time.sleep(.1)
         
     def f_left(self, event):
         self.s.send(b'5')
-        time.sleep(.10)
+        self.s.recv(1)
+        time.sleep(.1)
             
     def backward(self, event):
         self.s.send(b'1')
-        time.sleep(.10)
+        self.s.recv(1)
+        time.sleep(.1)
         
     def b_right(self, event):
         self.s.send(b'3')
-        time.sleep(.10)
+        self.s.recv(1)
+        time.sleep(.1)
         
     def b_left(self, event):
         self.s.send(b'2')
-        time.sleep(.10)
+        self.s.recv(1)
+        time.sleep(.1)
         
     def quit_client(self):
         self.s.send(b'7')
+        self.s.recv(1)
         self.s.close()
         self.master.destroy()
 
 root = tk.Tk()
-gui = Client(root, '10.2.21.214', 1337)
+gui = Client(root, '10.2.21.134', 1337)
 root.mainloop()
         
