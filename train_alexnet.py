@@ -8,16 +8,20 @@ Created on Tue Oct  3 12:15:59 2017
 import numpy as np
 from alexnet import alexnet
 
+TRIAL = 0
+SAMPLES = 648
+
 WIDTH = 150
 HEIGHT = 150
 LR = 1e-3
 EPOCHS = 10
 MODEL_NAME = 'APTnet-{}-{}-{}-epochs.model'.format(LR, 'alexnet', EPOCHS)
+TRAINING_DATA = 'trainingdata-{}-{}.npy'.format(TRIAL, SAMPLES)
 
 model = alexnet(WIDTH, HEIGHT, LR)
 print("model loaded")
 
-train_data = np.load('trainingdata.npy')
+train_data = np.load(TRAINING_DATA)
 print('loaded data')
 print(np.shape(train_data[0]), train_data[0])
 
