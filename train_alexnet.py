@@ -19,7 +19,7 @@ print("model loaded")
 
 train_data = np.load('trainingdata.npy')
 print('loaded data')
-print(np.shape(train_data[2][0]))
+print(np.shape(train_data[0]), train_data[0])
 
 train = train_data[:-5]
 test = train_data[-5:]
@@ -27,7 +27,9 @@ test = train_data[-5:]
 X = np.array([i[0] for i in train]).reshape(-1, WIDTH, HEIGHT, 1)
 Y = [i[1] for i in train]
 
-#print(np.shape(X), X)
+print(Y[200])
+
+print(np.shape(X), np.shape(Y))
 
 test_x = np.array([i[0] for i in test]).reshape(-1, WIDTH, HEIGHT, 1)
 test_y = [i[1] for i in test]
