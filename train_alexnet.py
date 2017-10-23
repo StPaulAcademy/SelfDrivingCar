@@ -2,12 +2,17 @@
 """
 Created on Tue Oct  3 12:15:59 2017
 
-@author: 18MichaelRH
+Authors: Michael Hall and Daniel Ellis
+Advanced Technology Projects 2017
+
+train_alexnet.py
 """
 
 import numpy as np
 from alexnet import alexnet
 
+MODEL_VERSION = 0.1
+#trial is for training data, version is for model version
 TRIAL = 0
 SAMPLES = 648
 
@@ -15,7 +20,7 @@ WIDTH = 150
 HEIGHT = 150
 LR = 1e-3
 EPOCHS = 10
-MODEL_NAME = 'APTnet-{}-{}-{}-epochs.model'.format(LR, 'alexnet', EPOCHS)
+MODEL_NAME = 'APTnet-alexnet-v{}.model'.format(MODEL_VERSION)
 TRAINING_DATA = 'trainingdata-{}-{}.npy'.format(TRIAL, SAMPLES)
 
 model = alexnet(WIDTH, HEIGHT, LR)
