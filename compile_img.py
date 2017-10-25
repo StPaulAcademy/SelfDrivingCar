@@ -35,25 +35,28 @@ for i in range(lengthdir):
     
     if curr_move == 1: 
         curr_moves_array = np.array([0,1,0])
-    if curr_move == 3:
-        curr_moves_array = np.array([1,0,0])
-    if curr_move == 2:
-        curr_moves_array = np.array([0,0,1])
-    print(file, curr_moves_array)
-    '''
-    add translating digits (4,5,6, ect) to one-hot arrays
-    '''
-    
-    image_move_data = [img, curr_moves_array] #format data
-    
-    
-    
-    train_data.append(image_move_data)
+        image_move_data = [img, curr_moves_array] #format data    
+        train_data.append(image_move_data)
     #train_data.append([img, [0,0,0]])
+    elif curr_move == 3:
+        curr_moves_array = np.array([1,0,0])
+        image_move_data = [img, curr_moves_array] #format data    
+        train_data.append(image_move_data)
+    elif curr_move == 2:
+        curr_moves_array = np.array([0,0,1])
+        image_move_data = [img, curr_moves_array] #format data    
+        train_data.append(image_move_data)
+        
+    print(file, curr_moves_array)
 
     if len(train_data) % 500 == 1: #save every 500 images and at end
         print(len(train_data))
         np.save('trainingdata.npy', train_data)
+
+#remove bad data
+for i in range(849, 858):
+    del train_data[i]
+    print('deleting'+ str(i))
 
 np.save('trainingdata.npy', train_data)
     
