@@ -16,7 +16,7 @@ from tflearn.layers.merge_ops import merge
 from tflearn.layers.estimator import regression
 
 def inceptionv3(width, height, lr):
-    network = input_data(shape=[None, width, height, 1])
+    network = input_data(shape=[None, width, height, 1], name='input')
     conv1_7_7 = conv_2d(network, 64, 7, strides=2, activation='relu', name='conv1_7_7_s2')
     pool1_3_3 = max_pool_2d(conv1_7_7, 3, strides=2)
     pool1_3_3 = local_response_normalization(pool1_3_3)
@@ -120,10 +120,10 @@ def inceptionv3(width, height, lr):
     pool5_7_7 = dropout(pool5_7_7, 0.4)
     
     # fc
-    loss = fully_connected(pool5_7_7, 17, activation='softmax')
+    loss = fully_connected(pool5_7_7, 3, activation='softmax')
     network = regression(loss, optimizer='momentum',
                          loss='categorical_crossentropy',
-                         learning_rate=lr)
+                         learning_rate=lr, name='targets')
     
     # to train
     model = tflearn.DNN(network, checkpoint_path='model_googlenet',
