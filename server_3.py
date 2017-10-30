@@ -45,14 +45,14 @@ class Server:
         self.master.bind('<KeyPress-e>', self.f_right)
         self.master.bind('<KeyRelease-e>', self.center)
 
-        self.master.bind('<KeyPress-s>', self.backward)
-        self.master.bind('<KeyRelease-s>', self.center)
-        
-        self.master.bind('<KeyPress-a>', self.b_left)
-        self.master.bind('<KeyRelease-a>', self.center)
-
-        self.master.bind('<KeyPress-d>', self.b_right)
-        self.master.bind('<KeyRelease-d>', self.center)
+#        self.master.bind('<KeyPress-s>', self.backward)
+#        self.master.bind('<KeyRelease-s>', self.center)
+#        
+#        self.master.bind('<KeyPress-a>', self.b_left)
+#        self.master.bind('<KeyRelease-a>', self.center)
+#
+#        self.master.bind('<KeyPress-d>', self.b_right)
+#        self.master.bind('<KeyRelease-d>', self.center)
         
         self.quitButton = tk.Button(self.master, text="Quit", command=self.quit_client)
         self.quitButton.place(x=0, y=0)
