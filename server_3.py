@@ -12,23 +12,28 @@ import socket
 import time
 import csv
 
+
 class Server:
     def __init__(self, master, port):
         #initialize csv
+
         self.moves = open('moves.csv', 'w', newline='')
         self.moves_csv = csv.writer(self.moves)
-        
+        self.master = master
         #server setup
         self.HOST = ''
         self.PORT = 1337
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.bind((self.HOST, self.PORT))
-        self.s.listen(5)
+        self.s.listen(1)
+        self.ready = True
+        time.sleep(1)
         print('A server opened at host ' + socket.gethostname() + ' on port ' + str(self.PORT)  + '!')
-        
-        #accept connection
         self.conn, self.addr = self.s.accept()
         print(self.addr[0] + ' has connected!')
+        
+        #accept connection
+        
         
         #keybindings
         self.master.bind('<KeyPress-w>', self.forward)
@@ -53,32 +58,59 @@ class Server:
         self.quitButton.place(x=0, y=0)
         
     def center(self, event):
-        global last_stop
-        if time.time()-last_stop >= 0.25:
-            self.s.send(0)
-            last_stop = time.time()
+#        global last_stop
+#        if time.time()-last_stop >= 0.25:
+#            self.conn.send(b'0')
+#            last_stop = time.time()
+        self.conn.send(b'0')
+        time.sleep(.01)
     def forward(self, event):
-        self.s.send(1)
-        self.moves_csv.writerow(1)
+        self.update_ready()
+        if self.ready == True:
+            self.conn.send(b'1')
+            self.moves_csv.writerow(str(1))
+            time.sleep(.01)
     def f_right(self, event):
-        self.s.send(2)
-        self.moves_csv.writerow(2)
+        self.update_ready()
+        if self.ready == True:
+            self.conn.send(b'2')
+            self.moves_csv.writerow(str(2))
+            time.sleep(.01)
     def f_left(self, event):
-        self.s.send(3)
-        self.moves_csv.writerow(3)
+        self.update_ready()
+        if self.ready == True:
+            self.conn.send(b'3')
+            self.moves_csv.writerow(str(3))
+            time.sleep(.01)
     def backward(self, event):
-        self.s.send(4)
-        self.moves_csv.writerow(4)
+        self.update_ready()
+        if self.ready == True:
+            self.conn.send(b'4')
+            self.moves_csv.writerow(str(4))
+            time.sleep(.01)
     def b_right(self, event):
-        self.s.send(5)
-        self.moves_csv.writerow(5)
+        self.update_ready()
+        if self.ready == True:
+            self.conn.send(b'5')
+            self.moves_csv.writerow(str(5))
+            time.sleep(.01)
     def b_left(self, event):
-        self.s.send(6)
-        self.moves_csv.writerow(6)
-    def quit_client(self, event):
-        self.s.send(7)
-        self.s.close()
+        self.update_ready()
+        if self.ready == True:
+            self.conn.send(b'6')
+            self.moves_csv.writerow(str(6))
+            time.sleep(.01)
+    def quit_client(self):
+        self.conn.send(b'7')
+        self.conn.close()
         self.master.destroy()
+        
+    def update_ready(self):
+        self.tmp = self.conn.recv(1)
+        if self.tmp == b'9':
+            self.ready = True
+        else:
+            self.ready = False
               
 root = tk.Tk()
 last_stop = time.time()
