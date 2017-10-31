@@ -11,8 +11,8 @@ from inceptionv3 import inceptionv3
 TRIAL = 0
 SAMPLES = 648
 
-WIDTH = 150
-HEIGHT = 150
+WIDTH = 100
+HEIGHT = 100
 LR = 1e-3
 EPOCHS = 10
 MODEL_NAME = 'APTnet-{}-{}-{}-epochs.model'.format(LR, 'inceptionv3', EPOCHS)
