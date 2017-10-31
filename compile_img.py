@@ -27,8 +27,7 @@ for i in range(lengthdir):
 
     img = np.load(os.path.join(os.curdir,'img', file)) # load image using np.load becasue files are .npy
     img = cv2.cvtColor(img , cv2.COLOR_BGR2GRAY) 
-    img = img[120:600][:] # 1:1 aspect ratio
-    img = cv2.resize(img, (150,150))
+
     
     print(moves[i])
     curr_move = moves[i] #set moves for image
@@ -54,9 +53,9 @@ for i in range(lengthdir):
         np.save('trainingdata.npy', train_data)
 
 #remove bad data
-for i in range(849, 858):
-    del train_data[i]
-    print('deleting'+ str(i))
+#for i in range(849, 858):
+#    del train_data[i]
+#    print('deleting'+ str(i))
 
 np.save('trainingdata.npy', train_data)
     
