@@ -17,7 +17,7 @@ import numpy as np
 #Initialize camera
 camera = picamera.PiCamera()
 rawCamera= PiRGBArray(camera)
-camera.resolution = (100, 100)
+camera.resolution = (160, 90)
 camera.color_effects = (128,128)
 time.sleep(2)
 
@@ -50,13 +50,13 @@ while True:
     else:
         ser.write(data)
         if data == b'1' or data == b'2' or data == b'3':
-            print('serial write' + str(time.time()-ts))
+            #print('serial write' + str(time.time()-ts))
             ts = time.time()
             camera.capture(rawCamera, format="bgr")
             image = rawCamera.array
-            print(np.shape(image))
-            np.save(str(x) + ".npy", image)
-            print('camera write' + str(time.time()-ts))
+            #print(np.shape(image))
+            np.save(str(x) + ".npy", image[:,:,0])
+            #print('camera write' + str(time.time()-ts))
             ts = time.time()
             x += 1
             s.send(b'9')
