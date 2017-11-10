@@ -26,7 +26,8 @@ for i in range(lengthdir):
     
 
     img = np.load(os.path.join(os.curdir,'img', file)) # load image using np.load becasue files are .npy
-    img = cv2.cvtColor(img , cv2.COLOR_BGR2GRAY) 
+    print(np.shape(img))
+    #img = cv2.cvtColor(img , cv2.COLOR_BGR2GRAY) 
 
     
     print(moves[i])
