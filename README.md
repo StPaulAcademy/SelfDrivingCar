@@ -12,6 +12,7 @@ This choice was made because after construction of the car it was discovered tha
 For motors, the car has a servo in the back for steering and a 12v dc motor geared 1:1 on the front.
 The motors are controlled using an arduino with an adafruit motorshield.
 The arduino recieves commands from a Raspberry Pi 3 which is the brains of the car.
+All processing and decision making by the AI is done entirely on-board simulating the unteathered nature of a full size self-driving car.
 
 ### Software
 
