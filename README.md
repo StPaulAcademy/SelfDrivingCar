@@ -1,8 +1,10 @@
-# Advanced Technology Projects Fall 2017, St. Paul Academy
+#ATLAS
 
-##### Self-Driving, 3d printed car
+## A Convlolutional Neural Network powered self-driving car
 
-###### By Michael Hall and Daniel Ellis '18
+### Advanced Technology Projects Fall 2017, St. Paul Academy
+
+#### By Michael Hall and Daniel Ellis '18
 
 ### Hardware
 
