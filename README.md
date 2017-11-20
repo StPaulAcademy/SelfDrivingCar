@@ -1,8 +1,5 @@
-#ATLAS
-
-## A Convlolutional Neural Network powered self-driving car
-
-### Advanced Technology Projects Fall 2017, St. Paul Academy
+## ATLAS: A Convlolutional Neural Network powered self-driving car
+#### Advanced Technology Projects Fall 2017, St. Paul Academy
 
 #### By Michael Hall and Daniel Ellis '18
 
@@ -20,7 +17,7 @@ All processing and decision making by the AI is done entirely on-board simulatin
 
 Except for the arduino which is programmed in C, all other code is in Python. 
 
-##### Training Data
+#### Training Data
 
 To capture training data we used a socket server to connect the Raspberry Pi to our computers and send commands from the q, w, and e keys for left, forward, and right. 
 Images are captured using a PiCamera in black and white with a 160 x 90 resolution.
