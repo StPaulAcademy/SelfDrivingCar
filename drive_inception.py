@@ -8,13 +8,11 @@ By Daniel Ellis and Michael Hall
 from inceptionv3 import inceptionv3
 import time
 import serial
-import picamera
-from picamera.array import PiRGBArray
+from picamera import PiCamera
 import numpy as np
-camera = picamera.PiCamera()
-rawCamera= PiRGBArray(camera)
-camera.resolution = (160, 90)
-camera.color_effects = (128,128)
+
+camera = PiCamera(sensor_mode=4, resolution='160x90')
+y_data = np.empty((96,160), dtype=np.uint8)
 time.sleep(2)
 
 ser = serial.Serial('/dev/ttyACM0', 9600)
@@ -39,27 +37,33 @@ model.load(MODEL_NAME)
 print("Loaded model!")
 
 while True:
-    camera.capture(rawCamera, format='bgr')
-    print("Captured image!")
-    image = np.asarray(rawCamera.array)[:,:,0]
+    print("-----------")
+    t = time.time()
+    try:
+        camera.capture(y_data, 'yuv')
+    except IOError:
+        pass
+    image = y_data[:90,:160]
+    image_time = time.time() -t
+    t = time.time()
     image = np.array(image).reshape(-1, WIDTH, HEIGHT, 1)
-    print("Formatted image!")
-    print(np.shape(image))
+    reshape_time = time.time() - t 
+    t = time.time()
     model_output = model.predict(image)
-    print("Made prediction!")
-    print(model_output)
+    predict_time = time.time() - t
+    
     model_prediction = np.argmax(model_output[0])
-    print("Got prediction value!")
-    print(model_prediction)
+
     if model_prediction == 0:
         ser.write(b'3')
-        print("Sent left command!")
+        print('prediction: ' + str(model_output) + '  ||  action: left')
     if model_prediction == 1:
         ser.write(b'1')
-        print("Sent forward command!")
+        print('prediction: ' + str(model_output) + '  ||  action: forward')
     if model_prediction == 2:
         ser.write(b'2')
-        print("Sent right command!")
+        print('prediction: ' + str(model_output) + '  ||  action: right')
     time.sleep(.2)
     ser.write(b'0')
-    rawCamera.truncate(0)
+
+    print('image time: ' + str(image_time) + '  ||  reshape time: '+ str(reshape_time) + "  ||  predict time: " + str(predict_time))
