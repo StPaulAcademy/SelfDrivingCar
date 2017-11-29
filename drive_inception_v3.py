@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-drive_inception_v2.py
+drive_inception_v3.py
 
 Drives ATLAS using video recording and async image transfer to the prediction
 Driving is continuous and relatively smooth
+
+This sends the motor angle to the arduino
+function to use is 90 + 45*(L - R) = angle to set motor
 
 By Daniel Ellis and Michael Hall
 """
@@ -68,13 +71,15 @@ while True:
         model_prediction = np.argmax(model_output[0])
     
         if model_prediction == 0:
-            ser.write(b'3')
+            ser.write(b'90')
             print('prediction: ' + str(model_output) + '  ||  action: left')
         if model_prediction == 1:
-            ser.write(b'1')
+            angle  = 90 + 45*(model_output[0][0]-model_output[0][2])
+            ser.write(bytes(str(angle), 'utf-8'))
             print('prediction: ' + str(model_output) + '  ||  action: forward')
         if model_prediction == 2:
-            ser.write(b'2')
+            angle  = 90 + 45*(model_output[0][0]-model_output[0][2])
+            ser.write(bytes(str(angle), 'utf-8'))
             print('prediction: ' + str(model_output) + '  ||  action: right')
         ready = True
         loop_time = time.time()-t
