@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/michael/Documents/Self-driving-car/Custom_net/models/net_v0_0_1.model"
+all_model_checkpoint_paths: "/home/michael/Documents/Self-driving-car/Custom_net/models/net_v0_0_1.model"
