@@ -23,6 +23,7 @@ void loop() {
 void forward(){
   myMotor->setSpeed(255);
   myMotor->run(FORWARD);
+  servo1.write(90);
   }
   
 void backward(){
