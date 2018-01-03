@@ -9,6 +9,7 @@ import numpy as np
 import os
 import networks
 
+#Set up camera and image output
 image = np.zeros((90,160))
 
 class Output(object):
@@ -29,9 +30,9 @@ camera = PiCamera(sensor_mode=4, resolution='160x90', framerate=40)
 y_data = np.empty((96,160), dtype=np.uint8)
 time.sleep(2)
 
-ser = serial.Serial('/dev/ttyACM0', 9600)
+ser = serial.Serial('/dev/ttyACM0', 9600) #open serial connection
 print("Opened serial connection!")
-
+#Load the model for driving the car
 MODEL_VERSION_1 = 0
 MODEL_VERSION_2 = 0
 MODEL_VERSION_3 = 1
@@ -57,7 +58,7 @@ print("graph time: " + str(graph_time))
 print("load time: " + str(load_time))
 
 time.sleep(5)
-
+#initialize for driving
 ready = True
 output = Output()
 camera.start_recording(output, 'yuv')
@@ -65,8 +66,8 @@ camera.start_recording(output, 'yuv')
 while True:
     #print("-----------")
     t = time.time()
-    if ready == False:
-        image = np.array(image).reshape(-1, WIDTH, HEIGHT, 1)
+    if ready == False: #if there is a new image ready to process
+        image = np.array(image).reshape(-1, WIDTH, HEIGHT, 1) #shape for network and predict
         model_output = model.predict(image)
         model_prediction = np.argmax(model_output[0])
     
