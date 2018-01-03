@@ -103,6 +103,7 @@ while True:
         
         if stopnet_prediction == 0: #if there is a stopsign then stop
             print('found a stopsign!!')
+            ser.write(b'0')
             break
         else: #if not then drive
             
@@ -111,13 +112,13 @@ while True:
         
             if drivenet_prediction == 0:
                 ser.write(b'3')
-                #print('prediction: ' + str(model_output) + '  ||  action: left')
+                print('prediction: ' + str(drivenet_output) + '  ||  action: left')
             if drivenet_prediction == 1:
                 ser.write(b'1')
-                #print('prediction: ' + str(model_output) + '  ||  action: forward')
+                print('prediction: ' + str(drivenet_output) + '  ||  action: forward')
             if drivenet_prediction == 2:
                 ser.write(b'2')
-                #print('prediction: ' + str(model_output) + '  ||  action: right')
+                print('prediction: ' + str(drivenet_output) + '  ||  action: right')
             ready = True
             loop_time = time.time()-t
            # print('loop time: '+ str(loop_time))
