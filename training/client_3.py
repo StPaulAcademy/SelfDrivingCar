@@ -13,6 +13,7 @@ import serial
 import picamera
 from picamera.array import PiRGBArray
 import numpy as np
+import multiprocessing as mp
 
 #Initialize camera
 camera = picamera.PiCamera()
@@ -34,36 +35,50 @@ time.sleep(1)
 print("connected!")
 x = 0
 s.send(b'9')
-while True:
-    ts = time.time()
-    data = s.recv(1)
 
-    ts = time.time()
-    if not data: 
-        break
-    if data == 7:
-        ser.write(b'0')
-        ser.close()
-        s.close()
-        print('The server has been closed!')
-        break
-    else:
-        ser.write(data)
-        if data == b'1' or data == b'2' or data == b'3':
-            camera.capture(rawCamera, format="bgr")
-            image = rawCamera.array
-            if data == b'1':
-                image = np.array([image[:,:,0], np.array([0,1,0])])
-            if data == b'3':
-                image = np.array([image[:,:,0], np.array([1,0,0])])
-            if data == b'2':
-                image = np.array([image[:,:,0], np.array([0,0,1])])
-            np.save(str(x) + ".npy", image)
-            x += 1
+
+save_ready = True
+def save_img(data):
+    global x, save_ready
+    save_ready = False
+    camera.capture(rawCamera, format="bgr")
+    image = rawCamera.array
+    if data == b'1':
+        image = np.array([image[:,:,0], np.array([0,1,0])])
+    if data == b'3':
+        image = np.array([image[:,:,0], np.array([1,0,0])])
+    if data == b'2':
+        image = np.array([image[:,:,0], np.array([0,0,1])])
+    np.save(str(x) + ".npy", image)
+    x += 1
+    rawCamera.truncate(0)
+
+def reset_img():
+    global save_ready
+    save_ready = True
+
+if __name__ == '__main__': 
+    pool = mp.Pool()
+    while True:
+        ts = time.time()
+        data = s.recv(1)
+    
+        ts = time.time()
+        if not data: 
+            break
+        if data == 7:
+            ser.write(b'0')
+            ser.close()
+            s.close()
+            print('The server has been closed!')
+            break
+        else:
+            ser.write(data)
+            if data == b'1' or data == b'2' or data == b'3':
+                if save_ready == True:
+                    pool.apply_async(save_img, args = (data, ), callback = reset_img)
+            print(x, data)
             s.send(b'9')
-
-        rawCamera.truncate(0)
-        print(x, data)
         
         
         
