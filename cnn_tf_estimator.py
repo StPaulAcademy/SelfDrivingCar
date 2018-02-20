@@ -33,16 +33,20 @@ def carlnet_fn(features, labels, mode):
       activation=tf.nn.relu)
 
   pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
-
+  print('pool shape')
+  print(tf.shape(pool2))
   pool2_flat = tf.reshape(pool2, [-1, 40 * 22 * 64])
-
+  
+  print('pool_flat shape')
+  print(tf.shape(pool2_flat))
+  
   dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
 
   dropout = tf.layers.dropout(
       inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
 
   logits = tf.layers.dense(inputs=dropout, units=3)
-  
+  print('logits shape')
   print(tf.shape(logits))
   
   predictions = {
@@ -57,7 +61,7 @@ def carlnet_fn(features, labels, mode):
     return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
   # Calculate Loss (for both TRAIN and EVAL modes)
-  loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+  loss = tf.losses.softmax_cross_entropy(labels, logits)
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
