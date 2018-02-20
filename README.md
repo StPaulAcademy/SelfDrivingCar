@@ -1,25 +1,7 @@
-## ATLAS: A Convlolutional Neural Network powered self-driving car
+## CARL: A Convlolutional Neural Network powered self-driving car
 #### Advanced Technology Projects Fall 2017, St. Paul Academy
 
 #### By Michael Hall and Daniel Ellis '18
 
-### Hardware
-
-Structural components of the car are designed from scratch in Fusion 360 and 3D printed in PLA plastic on Makerbot Replicator 2 printers. 
-The car is essentially a rear-wheel drive car driving backwards. 
-This choice was made because after construction of the car it was discovered that the car worked much better backwards than forwards. 
-For motors, the car has a servo in the back for steering and a 12v dc motor geared 1:1 on the front.
-The motors are controlled using an arduino with an adafruit motorshield.
-The arduino recieves commands from a Raspberry Pi 3 which is the brains of the car.
-All processing and decision making by the AI is done entirely on-board simulating the unteathered nature of a full size self-driving car.
-
-### Software
-
-Except for the arduino which is programmed in C, all other code is in Python. 
-
-#### Training Data
-
-To capture training data we used a socket server to connect the Raspberry Pi to our computers and send commands from the q, w, and e keys for left, forward, and right. 
-Images are captured using a PiCamera in black and white with a 160 x 90 resolution.
-The images are then saved along with the label (move taken before the picture) and saved as a numpy array.
-After collecting enough data the images are compiled into a single file ready for the neural net.
+#####Abstract
+Autonomous vehicles have the potential to vastly increase road safety and reduce the environmental impact of personal vehicles. While this technology is still in development, rapid progress has been made in areas such as processing speed and machine learning integration1. The goal of this project was to create an autonomous vehicle that incorporates cutting edge machine learning techniques on a smaller scale, while still being accessible. To meet this goal, we developed CARL, the Convolutional Autonomous dRiving vehicLe. CARL was built using a 3D printed chassis and accessible electronics, including a Raspberry Pi Model 3 and an Arduino Uno. A custom lightweight convolutional neural network, called CARLnet, was developed for the purpose of guiding the car around an arbitrarily shaped paper track. CARLnet was trained on approximately 8000 images and achieved over 95 percent accuracy in training. In testing, the car was able to drive around a track autonomously without human intervention. All data was processed using the car’s onboard computer.
