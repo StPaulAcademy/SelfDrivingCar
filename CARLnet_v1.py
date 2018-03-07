@@ -88,7 +88,9 @@ def CARLnet_fn(features, labels, mode):
   if mode == tf.estimator.ModeKeys.PREDICT:
     return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
   
-    
+  accuracy = tf.metrics.accuracy(labels, predictions = tf.one_hot(predictions["classes"], 3), name = "accuracy")
+  
+  print(accuracy)
   eval_metric_ops = {
       "accuracy": tf.metrics.accuracy(
           labels=labels, predictions=tf.one_hot(predictions["classes"], 3), name='acc')}
@@ -96,6 +98,9 @@ def CARLnet_fn(features, labels, mode):
   
   
   loss = tf.losses.softmax_cross_entropy(labels, logits)
+
+  #accuracy_summary = tf.summary.scalar("Accuracy", accuracy)
+  #loss_summary = tf.summary.scalar("Loss", loss)
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
@@ -137,22 +142,22 @@ def main(unused_argv):
 
   # Set up logging for predictions
   # Log the values in the "Softmax" tensor with label "probabilities"
-  tensors_to_log = {"probabilities": "softmax_tensor", "accuracy": "acc"}
-  logging_hook = tf.train.LoggingTensorHook(
-      tensors=tensors_to_log, every_n_iter=5000)
+#  tensors_to_log = {"probabilities": "softmax_tensor"}
+#  logging_hook = tf.train.LoggingTensorHook(
+#      tensors=tensors_to_log, every_n_iter=128)
 
   # Train the model
   train_input_fn = tf.estimator.inputs.numpy_input_fn(
       x={"x": train_data},
       y=train_labels,
       batch_size=128,
-      num_epochs=None,
+      num_epochs=1,
       shuffle=True)
   
   CARLnet_classifier.train(
       input_fn=train_input_fn,
-      steps=20000,
-      hooks = [logging_hook])
+      steps=None,
+      )
 
   # Evaluate the model and print results
   eval_input_fn = tf.estimator.inputs.numpy_input_fn(
