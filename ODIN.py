@@ -10,7 +10,7 @@ import tensorflow as tf
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
-def IOU(x1, y1, w1, h1, x2, y2, w2, h2):
+def IOU(x1, y1, w1, h1, x2, y2, w2, h2): #Intersection over Union gives a metric of how close the bounding box is to the ground truth
     box11 = [ x1-(w1/2), y1-(h1/2) ]
     box12 = [ x1+(w1/2), y1+(h1/2) ]
     box21 = [ x2-(w2/2), y2-(h2/2) ]
@@ -31,6 +31,7 @@ def IOU(x1, y1, w1, h1, x2, y2, w2, h2):
     return Iarea/Uarea
 
 def ODINloss(logits, labels):
+    #TERM1 Calculates error in center location of cells; labels[k][0] is whether there is an object in the bounding box as a bool
     term1 = 0
     k = 0
     for i in range(0,2):
@@ -38,7 +39,9 @@ def ODINloss(logits, labels):
             term1 += labels[k][0] * ((logits[i][j][1]-labels[k][1])**2 + (logits[i][j][2]-labels[k][2])**2)
             k += 1
     term1 = term1*5
-    
+    #log it
+    tf.summary.scalar("Loss_term1", term1)
+    #TERM2 Error in size of bounding boxes--square root to scale to size (small errors small box more important than small errors big box)
     term2 = 0
     k = 0
     for i in range(0,2):
@@ -47,6 +50,37 @@ def ODINloss(logits, labels):
             k += 1
     term2 = term2 * 5
     
+    tf.summary.scalar("Loss_term2", term2)
+    #TERM3 error in confidence value--confidence is calculated as the IOU of the ground truth and predicted
+    term3 = 0
+    k = 0
+    for i in range(0,2):
+        for j in range(0,2):
+            term3 += labels[k][0] * (IOU(logits[i][j][1], logits[i][j][2], logits[i][j][3], logits[i][j][4], labels[k][1], labels[k][2], labels[k][3], labels[k][4]) - 1)
+            k += 1
+    
+    tf.summary.scalar("Loss_term3", term3)
+    #TERM4 pushes confidence to 0 when there is no object in the quadrant
+    term4 = 0
+    k = 0
+    for i in range(0,2):
+        for j in range(0,2):
+            term4 += (not labels[k][0]) * (IOU(logits[i][j][1], logits[i][j][2], logits[i][j][3], logits[i][j][4], labels[k][1], labels[k][2], labels[k][3], labels[k][4]))
+            k += 1
+    term4 = term4 * 0.5
+    
+    tf.summary.scalar("Loss_term4", term4)
+    #TERM5 classification error using cross entropy
+    term5 = 0
+    for i in range(0,2):
+        for j in range(0,2):
+            term5 += tf.losses.sparse_softmax_cross_entropy(labels[k][5], logits[i][j][:-3])
+            k += 1
+    
+    tf.summary.scalar("Loss_term5", term5)
+    
+    loss = term1 + term2 + term3 + term4 + term5
+    return loss
     
 
 def ODIN_fn(features, labels, mode):
