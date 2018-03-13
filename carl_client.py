@@ -29,7 +29,7 @@ class Car():
         self.motor_hat = Adafruit_MotorHAT(addr=0x60)
         self.motor = self.motor_hat.getMotor(1)
         self.motor.setSpeed(250)
-        GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BMC)
         GPIO.setup(17, GPIO.OUT)
         self.servo = GPIO.PWM(17, 50)
         self.servo.start(7.5)
