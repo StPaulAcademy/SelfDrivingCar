@@ -6,4 +6,5 @@ Created on Tue Mar 13 12:44:39 2018
 @author: michael
 """
 
-TEST FILE
+import cv2
+import numpy as np
