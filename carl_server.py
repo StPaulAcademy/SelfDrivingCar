@@ -6,8 +6,9 @@ Created By Daniel Ellis and Michael Hall
 import ctypes
 import time
 import socket
+import sys
     
-class Car():
+class Car(): 
     def __init__(self, port):
         self.lastCode = 0
         self.recieved = True
@@ -35,8 +36,9 @@ class Car():
         time.sleep(3)
         self.connection.close()
         print("Server closed")
-try:       
-    carl = Car(1348)
+try:
+    print(sys.argv)
+    carl = Car(int(sys.argv[1]))
     while True:
         carl.getKeyboard()
 

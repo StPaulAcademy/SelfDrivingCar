@@ -9,6 +9,7 @@ import socket
 import time
 import RPi.GPIO as GPIO
 from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
+import sys
 
 class Output(object):
     def write(self, buf):
@@ -17,7 +18,7 @@ class Output(object):
         y_data = np.frombuffer(buf, dtype=np.uint8, count= 160*160).reshape((160,160))
         if ready == True:
             image = y_data[:160, :160]
-            ready= False
+            ready = False
             
     def flush(self):
         pass
@@ -39,7 +40,7 @@ class Car():
         time.sleep(2)
         self.output = Output()
         self.camera.start_recording(self.output, 'yuv')
-        self.ready = True
+
         
         
     def recieveData(self, number):
@@ -48,6 +49,7 @@ class Car():
         if data == b'15':
             if ready == False:
                     np.save(str(number) + ".npy", np.array([image, np.array([0,1,0])]))
+                    ready = True
             self.motor.setSpeed(200)
             self.motor.run(Adafruit_MotorHAT.FORWARD)
             self.servo.ChangeDutyCycle(7.5)
@@ -55,6 +57,7 @@ class Car():
         if data == b'8':
             if ready == False:
                     np.save(str(number) + ".npy", np.array([image, np.array([0,0,1])]))
+                    ready = True
             self.motor.setSpeed(200)
             self.motor.run(Adafruit_MotorHAT.FORWARD)
             self.servo.ChangeDutyCycle(2.5)
@@ -62,6 +65,7 @@ class Car():
         if data == b'14':
             if ready == False:
                     np.save(str(number) + ".npy", np.array([image, np.array([1,0,0])]))
+                    ready = True
             self.motor.setSpeed(200)    
             self.motor.run(Adafruit_MotorHAT.FORWARD)
             self.servo.ChangeDutyCycle(12.5)
@@ -96,8 +100,8 @@ class Car():
         else:
             pass
 
-carl = Car()
 number = 0
+ready = True
 while True:
     carl.recieveData(number)
     number += 1
