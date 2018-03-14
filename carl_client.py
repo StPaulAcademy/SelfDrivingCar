@@ -33,73 +33,80 @@ class Car():
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(17, GPIO.OUT)
         self.servo = GPIO.PWM(17, 50)
-        self.servo.start(7.5)
+        self.servo.start(7.0)
         self.camera = PiCamera(sensor_mode=4, resolution='160x160', framerate=40)
         self.image = np.zeros((160,160))
         self.y_data = np.empty((160,160), dtype=np.uint8)
         time.sleep(2)
         self.output = Output()
         self.camera.start_recording(self.output, 'yuv')
+        self.speed = 150
 
         
         
     def recieveData(self, number):
+        global ready
+
         data = self.client.recv(2048)
         
         if data == b'15':
             if ready == False:
                     np.save(str(number) + ".npy", np.array([image, np.array([0,1,0])]))
                     ready = True
-            self.motor.setSpeed(200)
+                    print(number)
+            self.motor.setSpeed(self.speed)
             self.motor.run(Adafruit_MotorHAT.FORWARD)
-            self.servo.ChangeDutyCycle(7.5)
+            self.servo.ChangeDutyCycle(7.0)
             
         if data == b'8':
             if ready == False:
                     np.save(str(number) + ".npy", np.array([image, np.array([0,0,1])]))
                     ready = True
-            self.motor.setSpeed(200)
+                    print(number)
+            self.motor.setSpeed(self.speed)
             self.motor.run(Adafruit_MotorHAT.FORWARD)
-            self.servo.ChangeDutyCycle(2.5)
+            self.servo.ChangeDutyCycle(12.5)
             
         if data == b'14':
             if ready == False:
                     np.save(str(number) + ".npy", np.array([image, np.array([1,0,0])]))
                     ready = True
-            self.motor.setSpeed(200)    
+                    print(number)
+            self.motor.setSpeed(self.speed)    
             self.motor.run(Adafruit_MotorHAT.FORWARD)
             self.servo.ChangeDutyCycle(12.5)
         if data == b'3':
-            self.motor.setSpeed(200)
+            self.motor.setSpeed(self.speed)
             self.motor.run(Adafruit_MotorHAT.BACKWARD)
-            self.servo.ChangeDutyCycle(7.5)
+            self.servo.ChangeDutyCycle(7.0)
             
         if data == b'4':
-            self.motor.setSpeed(200)
-            self.motor.run(Adafruit_MotorHAT.BACKWARD)
-            self.servo.ChangeDutyCycle(2.5)
-            
-        if data == b'2':
-            self.motor.setSpeed(200)    
+            self.motor.setSpeed(self.speed)
             self.motor.run(Adafruit_MotorHAT.BACKWARD)
             self.servo.ChangeDutyCycle(12.5)
+            
+        if data == b'2':
+            self.motor.setSpeed(self.speed)    
+            self.motor.run(Adafruit_MotorHAT.BACKWARD)
+            self.servo.ChangeDutyCycle(2.5)
             
         if data == b'20':
             self.client.close()
             self.motor.setSpeed(0)
             self.motor.run(Adafruit_MotorHAT.RELEASE)
-            self.servo.ChangeDutyCycle(7.5)
+            self.servo.ChangeDutyCycle(7.0)
             print("Server closed")
             self.camera.stop_recording()
             exit()
             
         if data == b'0':
             self.motor.setSpeed(0)
-            self.servo.ChangeDutyCycle(7.5)
+            self.servo.ChangeDutyCycle(7.0)
             
         else:
             pass
 
+carl = Car(sys.argv[1], int(sys.argv[2]))
 number = 0
 ready = True
 while True:

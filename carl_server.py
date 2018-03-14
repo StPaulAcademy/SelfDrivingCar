@@ -38,7 +38,8 @@ class Car():
         print("Server closed")
 try:
     print(sys.argv)
-    carl = Car(int(sys.argv[1]))
+    carl = Car(1337)
+    #int(sys.argv[1])
     while True:
         carl.getKeyboard()
 
