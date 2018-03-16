@@ -31,55 +31,62 @@ def IOU(x1, y1, w1, h1, x2, y2, w2, h2): #Intersection over Union gives a metric
     return Iarea/Uarea
 
 def ODINloss(logits, labels):
-    #TERM1 Calculates error in center location of cells; labels[k][0] is whether there is an object in the bounding box as a bool
+    #TERM1 Calculates error in center location of cells; labels[:, k, 0] is whether there is an object in the bounding box as a bool slicing because batch is first dimension
+    labels = tf.cast(labels, tf.float32)
+
     term1 = 0
     k = 0
     for i in range(0,2):
         for j in range(0,2):
-            term1 += labels[k][0] * ((logits[i][j][1]-labels[k][1])**2 + (logits[i][j][2]-labels[k][2])**2)
+            term1 += labels[:, k, 0] * ((logits[:, i, j, 1]-labels[:, k, 1])**2 + (logits[:, i, j, 2]-labels[:, k, 2])**2)
             k += 1
     term1 = term1*5
     #log it
-    tf.summary.scalar("Loss_term1", term1)
+    tf.summary.scalar("Loss_term1", tf.reduce_mean(term1))
     #TERM2 Error in size of bounding boxes--square root to scale to size (small errors small box more important than small errors big box)
     term2 = 0
     k = 0
     for i in range(0,2):
         for j in range(0,2):
-            term2 += labels[k][0] * ( ((logits[i][j][3])**(.5) - (logits[k][3])**(.5))**2 +  ((logits[i][j][4])**(.5) - (logits[k][4])**(.5))**2 )
+            term2 += labels[:, k, 0] * ( ((logits[:, i, j, 3])**(.5) - (labels[:, k, 3])**(.5))**2 +  ((logits[:, i, j, 4])**(.5) - (labels[:, k, 4])**(.5))**2 )
             k += 1
     term2 = term2 * 5
     
-    tf.summary.scalar("Loss_term2", term2)
+    tf.summary.scalar("Loss_term2", tf.reduce_mean(term2))
     #TERM3 error in confidence value--confidence is calculated as the IOU of the ground truth and predicted
     term3 = 0
     k = 0
     for i in range(0,2):
         for j in range(0,2):
-            term3 += labels[k][0] * (IOU(logits[i][j][1], logits[i][j][2], logits[i][j][3], logits[i][j][4], labels[k][1], labels[k][2], labels[k][3], labels[k][4]) - 1)
+            term3 += labels[:, k, 0] * (logits[:, i, j, 0] - IOU(logits[:, i, j, 1], logits[:, i, j, 2], logits[:, i, j, 3], logits[:, i, j, 4], labels[:, k, 1], labels[:, k, 2], labels[:, k, 3], labels[:, k, 4]))
             k += 1
     
-    tf.summary.scalar("Loss_term3", term3)
+    tf.summary.scalar("Loss_term3", tf.reduce_mean(term3))
     #TERM4 pushes confidence to 0 when there is no object in the quadrant
     term4 = 0
     k = 0
     for i in range(0,2):
         for j in range(0,2):
-            term4 += (not labels[k][0]) * (IOU(logits[i][j][1], logits[i][j][2], logits[i][j][3], logits[i][j][4], labels[k][1], labels[k][2], labels[k][3], labels[k][4]))
+            term4 += ((-1 * labels[:, k, 0]) + 1) * (logits[:, i, j, 0] - IOU(logits[:, i, j, 1], logits[:, i, j, 2], logits[:, i, j, 3], logits[:, i, j, 4], labels[:, k, 1], labels[:, k, 2], labels[:, k, 3], labels[:, k, 4]))
             k += 1
     term4 = term4 * 0.5
     
-    tf.summary.scalar("Loss_term4", term4)
+    tf.summary.scalar("Loss_term4", tf.reduce_mean(term4))
     #TERM5 classification error using cross entropy
     term5 = 0
+    k = 0
+    class_labels = tf.cast(labels[:,k,5], tf.int32)
     for i in range(0,2):
         for j in range(0,2):
-            term5 += tf.losses.sparse_softmax_cross_entropy(labels[k][5], logits[i][j][:-3])
+            term5 += tf.losses.sparse_softmax_cross_entropy(class_labels, logits[:, i, j, 5:])
             k += 1
     
-    tf.summary.scalar("Loss_term5", term5)
+    tf.summary.scalar("Loss_term5", tf.reduce_mean(term5))
     
     loss = term1 + term2 + term3 + term4 + term5
+
+    loss = tf.reduce_mean(loss)
+    tf.summary.scalar("loss", loss)
     return loss
     
 
@@ -122,7 +129,7 @@ def ODIN_fn(features, labels, mode):
   pool2 = tf.layers.max_pooling2d(
           inputs = conv_3,
           pool_size = [2,2],
-          stries = 2,
+          strides = 2,
           name = "pool2")
   norm2 = tf.nn.local_response_normalization(pool2)
   
@@ -163,14 +170,14 @@ def ODIN_fn(features, labels, mode):
   
   logits = tf.layers.max_pooling2d(
           inputs = conv_7,
-          pool_size = [3,3],
-          strides = 3,
+          pool_size = [2,2],
+          strides = 2,
           name = "logits")
   print(tf.shape(logits))
   
   predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
-      "classes": tf.argmax(input=logits, axis=1),
+      #"classes": tf.argmax(input=logits, axis=1),
       # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
       # `logging_hook`.
       "probabilities": logits
@@ -190,22 +197,22 @@ def ODIN_fn(features, labels, mode):
         global_step=tf.train.get_global_step())
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
-  # Add evaluation metrics (for EVAL mode)
-  eval_metric_ops = {
-      "accuracy": tf.metrics.accuracy(
-          labels=labels, predictions=predictions["classes"])}
-  return tf.estimator.EstimatorSpec(
-      mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+#  # Add evaluation metrics (for EVAL mode)
+#  eval_metric_ops = {
+#      "accuracy": tf.metrics.accuracy(
+#          labels=labels, predictions=predictions["classes"])}
+#  return tf.estimator.EstimatorSpec(
+#      mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
 
 def main(unused_argv):
   # Load training and eval data
-  data = np.load('traindata-2-4.npy')
+  data = np.load('ODINdata.npy')
   train = data
-  print(np.shape(train[0]))
+  print(np.shape(train[0]), train.shape)
   
   
-  features = np.array([i[0] for i in train]).reshape(-1, 90, 160, 1)
+  features = np.array([i[0] for i in train]).reshape(-1, 160, 160, 1)
   labels = np.array([i[1] for i in train])
   
   
@@ -213,10 +220,10 @@ def main(unused_argv):
   print(np.shape(features))
   
   
-  train_data =  features[:-100]
-  train_labels = labels[:-100]
-  eval_data =  features[-100:]
-  eval_labels = labels[-100:]
+  train_data =  features
+  train_labels = labels
+  eval_data =  features
+  eval_labels = labels
 
   # Create the Estimator
   ODIN_classifier = tf.estimator.Estimator(
@@ -224,30 +231,30 @@ def main(unused_argv):
 
   # Set up logging for predictions
   # Log the values in the "Softmax" tensor with label "probabilities"
-  tensors_to_log = {"probabilities": "logits"}
-  logging_hook = tf.train.LoggingTensorHook(
-      tensors=tensors_to_log, every_n_iter=50)
+#  tensors_to_log = {"probabilities": "logits"}
+#  logging_hook = tf.train.LoggingTensorHook(
+#      tensors=tensors_to_log, every_n_iter=50)
 
   # Train the model
   train_input_fn = tf.estimator.inputs.numpy_input_fn(
       x={"x": train_data},
       y=train_labels,
-      batch_size=100,
-      num_epochs=None,
+      batch_size=128,
+      num_epochs=100,
       shuffle=True)
+  
   ODIN_classifier.train(
       input_fn=train_input_fn,
-      steps=20000,
-      hooks=[logging_hook])
+      steps=None)
 
   # Evaluate the model and print results
-  eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-      x={"x": eval_data},
-      y=eval_labels,
-      num_epochs=1,
-      shuffle=False)
-  eval_results = ODIN_classifier.evaluate(input_fn=eval_input_fn)
-  print(eval_results)
+#  eval_input_fn = tf.estimator.inputs.numpy_input_fn(
+#      x={"x": eval_data},
+#      y=eval_labels,
+#      num_epochs=1,
+#      shuffle=False)
+#  eval_results = ODIN_classifier.evaluate(input_fn=eval_input_fn)
+#  print(eval_results)
 
 
 if __name__ == "__main__":
