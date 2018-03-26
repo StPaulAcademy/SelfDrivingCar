@@ -24,33 +24,38 @@ for line in filedata:
     h = float(items[5])/160
     
     img = cv2.imread('./info/{}'.format(items[0]))
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     if x < .5:
-        if y < .5:
-            data.append([img, [[True, x, y, w, h, 0],
-                         [False, 0,0,0,0,0],
-                         [False, 0,0,0,0,0],
-                         [False, 0,0,0,0,0]]])
-        if y > .5:
-            data.append([img, [[False, 0,0,0,0,0],
-                        [True, x, y, w, h, 0],
-                        [False, 0,0,0,0,0],
-                        [False, 0,0,0,0,0]]])
+        if y < .5: #TOP LEFT
+            data.append([img, [[1, x, y, w, h, 0],
+                         [0, 0,0,0,0,0],
+                         [0, 0,0,0,0,0],
+                         [0, 0,0,0,0,0]]])
+        else:#BOTTOM LEFT
+            y -= .5
+            data.append([img, [[0, 0,0,0,0,0],
+                        [1, x, y, w, h, 0],
+                        [0, 0,0,0,0,0],
+                        [0, 0,0,0,0,0]]])
     else:
-        if y < .5:
-            data.append([img, [[False, 0,0,0,0,0],
-                         [False, 0,0,0,0,0],
-                         [True, x, y, w, h, 0],
-                         [False, 0,0,0,0,0]]])
-        if y > .5:
-            data.append([img, [[False, 0,0,0,0,0],
-                        [False, 0,0,0,0,0],
-                        [False, 0,0,0,0,0],
-                        [True, x, y, w, h, 0]]])
-    data.append([img, [[False, 0,0,0,0,0],
-                       [False, 0,0,0,0,0],
-                       [False, 0,0,0,0,0],
-                       [False, 0,0,0,0,0]]])
-    print(i)
+        x -= .5
+        if y < .5: #TOP RIGHT
+            data.append([img, [[0, 0,0,0,0,0],
+                         [0, 0,0,0,0,0],
+                         [1, x, y, w, h, 0],
+                         [0, 0,0,0,0,0]]])
+        else: #BOTTOM RIGHT
+            y -= .5
+            data.append([img, [[0, 0,0,0,0,0],
+                        [0, 0,0,0,0,0],
+                        [0, 0,0,0,0,0],
+                        [1, x, y, w, h, 0]]])
+    
+    data.append([img, [[0, 0,0,0,0,0],
+                       [0, 0,0,0,0,0],
+                       [0, 0,0,0,0,0],
+                       [0, 0,0,0,0,0]]])
+    print(i, len(data))
     i += 1
 np.save('ODINdata.npy', data)
 file.close()
