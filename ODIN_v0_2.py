@@ -24,13 +24,16 @@ def IOU(x1, y1, w1, h1, x2, y2, w2, h2): #Intersection over Union gives a metric
     xI2 = tf.minimum(box12[0], box22[0])
     yI2 = tf.minimum(box12[1], box22[1])
     
-    Iarea = (xI1 - xI2 + 1) * (yI1 - yI2 + 1)
+    Iarea = tf.abs((xI1 - xI2) * (yI1 - yI2))
     
-    totalarea = w1*h1 + w2*h2
+    totalarea = tf.abs(w1*h1 + w2*h2)
     
     Uarea = totalarea - Iarea
     
-    return Iarea/Uarea
+    IOU = Iarea/Uarea
+    
+    IOU = tf.where(tf.is_nan(IOU), tf.zeros_like(IOU), IOU)
+    return IOU
 
 def ODINloss(logits, labels):
     #TERM1 Calculates error in center location of cells; labels[:, k, 0] is whether there is an object in the bounding box as a bool slicing because batch is first dimension
@@ -46,7 +49,7 @@ def ODINloss(logits, labels):
     #TERM2 Error in size of bounding boxes--square root to scale to size (small errors small box more important than small errors big box)
     term2 = 0
 
-    for k in range(0,2):
+    for k in range(0,4):
         term2 += labels[:, k, 0] * ( (tf.abs(logits[:, 8*k + 3])**(.5) - tf.abs(labels[:, k, 3])**(.5))**2 +  (tf.abs(logits[:, 8*k + 4])**(.5) - tf.abs(labels[:, k, 4])**(.5))**2 )
     term2 = term2 * 5
     
@@ -54,16 +57,16 @@ def ODINloss(logits, labels):
     #TERM3 error in confidence value--confidence is calculated as the IOU of the ground truth and predicted
     term3 = 0
 
-    for k in range(0,2):
-        term3 += labels[:, k, 0] * (logits[:, 8*k + 0] - IOU(logits[:, 8*k + 1], logits[:, 8*k + 2], logits[:, 8*k + 3], logits[:, 8*k + 4], labels[:, k, 1], labels[:, k, 2], labels[:, k, 3], labels[:, k, 4]))
+    for k in range(0,4):
+        term3 += labels[:, k, 0] * ((logits[:, 8*k + 0] - IOU(logits[:, 8*k + 1], logits[:, 8*k + 2], logits[:, 8*k + 3], logits[:, 8*k + 4], labels[:, k, 1], labels[:, k, 2], labels[:, k, 3], labels[:, k, 4])))
 
-    
+    term3 = term3*0.5
     tf.summary.scalar("Loss_term3", tf.reduce_mean(term3))
     #TERM4 pushes confidence to 0 when there is no object in the quadrant
     term4 = 0
 
-    for k in range(0,2):
-        term4 += ((-1 * labels[:, k, 0]) + 1) * (logits[:, 8*k + 0] - IOU(logits[:, 8*k + 1], logits[:, 8*k + 2], logits[:, 8*k + 3], logits[:, 8*k + 4], labels[:, k, 1], labels[:, k, 2], labels[:, k, 3], labels[:, k, 4]))
+    for k in range(0,4):
+        term4 += ((-1 * labels[:, k, 0]) + 1) * ((logits[:, 8*k + 0] - 0)**2)
         
     term4 = term4 * 0.5
     
@@ -72,13 +75,15 @@ def ODINloss(logits, labels):
     term5 = 0
 
     class_labels = tf.cast(labels[:,k,5], tf.int32)
-    for i in range(0,2):
+    for i in range(0,4):
         term5 += tf.losses.sparse_softmax_cross_entropy(class_labels, logits[:, 8*k + 5: 8*(k+1)])
     
     tf.summary.scalar("Loss_term5", tf.reduce_mean(term5))
     
     loss = term1 + term2 + term3 + term4 + term5
-
+#    loss = term1 + term2
+#    loss = term3 + term4
+    
     loss = tf.reduce_mean(loss)
     tf.summary.scalar("loss", loss)
     return loss
@@ -156,7 +161,8 @@ def ODIN_fn(features, labels, mode):
           activation = tf.nn.relu,
           name = "conv6_3x3")
   conv_6_flat = tf.reshape(conv_6, [-1, 512])
-  logits = tf.layers.dense(conv_6_flat, units=32, activation=tf.nn.relu)
+  fully_connected = tf.layers.dense(conv_6_flat, units=512, activation=tf.nn.relu)
+  logits = tf.layers.dense(fully_connected, units=32, activation=tf.nn.relu)
   print(tf.shape(logits))
   
   predictions = {
@@ -175,7 +181,7 @@ def ODIN_fn(features, labels, mode):
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+    optimizer = tf.train.MomentumOptimizer(learning_rate=0.0001, momentum = 0.9)
     train_op = optimizer.minimize(
         loss=loss,
         global_step=tf.train.get_global_step())
@@ -211,7 +217,7 @@ def main(unused_argv):
 
   # Create the Estimator
   ODIN_classifier = tf.estimator.Estimator(
-      model_fn=ODIN_fn, model_dir="/tmp/ODIN/model_3")
+      model_fn=ODIN_fn, model_dir="/tmp/ODIN/model_7")
 
   # Set up logging for predictions
   # Log the values in the "Softmax" tensor with label "probabilities"

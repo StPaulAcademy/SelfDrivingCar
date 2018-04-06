@@ -22,13 +22,17 @@ def IOU(x1, y1, w1, h1, x2, y2, w2, h2): #Intersection over Union gives a metric
     xI2 = tf.minimum(box12[0], box22[0])
     yI2 = tf.minimum(box12[1], box22[1])
     
-    Iarea = (xI1 - xI2 + 1) * (yI1 - yI2 + 1)
+    Iarea = (xI1 - xI2) * (yI1 - yI2)
     
     totalarea = w1*h1 + w2*h2
     
     Uarea = totalarea - Iarea
     
-    return Iarea/Uarea
+    IOU = Iarea/Uarea
+    
+    IOU = tf.where(tf.is_nan(IOU), tf.zeros_like(IOU), IOU)
+    
+    return IOU
 
 def ODINloss(logits, labels):
     #TERM1 Calculates error in center location of cells; labels[:, k, 0] is whether there is an object in the bounding box as a bool slicing because batch is first dimension
@@ -186,7 +190,7 @@ def ODIN_fn(features, labels, mode):
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+    optimizer = tf.train.MomentumOptimizer(learning_rate=0.001, momentum=0.9)
     train_op = optimizer.minimize(
         loss=loss,
         global_step=tf.train.get_global_step())
@@ -222,7 +226,7 @@ def main(unused_argv):
 
   # Create the Estimator
   ODIN_classifier = tf.estimator.Estimator(
-      model_fn=ODIN_fn, model_dir="/tmp/ODIN/model_2")
+      model_fn=ODIN_fn, model_dir="/tmp/ODIN/model_6")
 
   # Set up logging for predictions
   # Log the values in the "Softmax" tensor with label "probabilities"
