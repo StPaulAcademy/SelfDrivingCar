@@ -170,7 +170,7 @@ def ODIN_fn(features, labels, mode):
           inputs = conv_6,
           filters = 8,
           kernel_size = [1,1],
-          activation = tf.nn.relu,
+          activation = tf.nn.sigmoid,
           name = "conv7_1x1")
   
   logits = tf.layers.max_pooling2d(
@@ -221,12 +221,12 @@ def main(unused_argv):
   
   train_data =  features
   train_labels = labels
-  eval_data =  features
-  eval_labels = labels
+  eval_data =  features[22:23]
+  eval_labels = labels[22:23]
 
   # Create the Estimator
   ODIN_classifier = tf.estimator.Estimator(
-      model_fn=ODIN_fn, model_dir="/tmp/ODIN/model_6")
+      model_fn=ODIN_fn, model_dir="/tmp/ODIN/sigmoid_2")
 
   # Set up logging for predictions
   # Log the values in the "Softmax" tensor with label "probabilities"
@@ -242,27 +242,18 @@ def main(unused_argv):
       num_epochs= 100,
       shuffle=True)
   
-  ODIN_classifier.train(
-      input_fn=train_input_fn,
-      steps=None)
+#  ODIN_classifier.train(
+#      input_fn=train_input_fn,
+#      steps=None)
 
-  # Evaluate the model and print results
-#  eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-#      x={"x": eval_data},
-#      y=eval_labels,
-#      num_epochs=1,
-#      shuffle=False)
-#  eval_results = ODIN_classifier.evaluate(input_fn=eval_input_fn)
-#  print(eval_results)
-#  predict_input = tf.estimator.inputs.numpy_input_fn(x={"x": eval_data}, shuffle=False)
-#    
-#  ODIN_output = ODIN_classifier.predict(predict_input, predict_keys="output")
-#
-#  for i, j in enumerate(ODIN_output):
-#      print('expected')
-#      print(eval_labels[i])
-#      print("got")
-#      print(j)
+  predict_fn = tf.estimator.inputs.numpy_input_fn(
+      x = {"x": eval_data},
+      num_epochs = 1,
+      shuffle = False)
+  predict_result = ODIN_classifier.predict(input_fn=predict_fn)
+  print(eval_labels)
+  print(list(predict_result))
+
 
 
 
