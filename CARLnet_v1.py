@@ -116,58 +116,8 @@ def CARLnet_fn(features, labels, mode):
       mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
 
-def main(unused_argv):
-  # Load training and eval data
-  data = np.load('traindata-2-4.npy')
-  train = data
-  print(np.shape(train[0]))
-  
-  
-  features = np.array([i[0] for i in train]).reshape(-1, 90, 160, 1)
-  labels = np.array([i[1] for i in train])
-  
-  
-  print(labels.shape)
-  print(np.shape(features))
-  
-  
-  train_data =  features[:-100]
-  train_labels = labels[:-100]
-  eval_data =  features[-100:]
-  eval_labels = labels[-100:]
-
-  # Create the Estimator
-  CARLnet_classifier = tf.estimator.Estimator(
-      model_fn=CARLnet_fn, model_dir="/tmp/carlnet_model")
-
-  # Set up logging for predictions
-  # Log the values in the "Softmax" tensor with label "probabilities"
-#  tensors_to_log = {"probabilities": "softmax_tensor"}
-#  logging_hook = tf.train.LoggingTensorHook(
-#      tensors=tensors_to_log, every_n_iter=128)
-
-  # Train the model
-  train_input_fn = tf.estimator.inputs.numpy_input_fn(
-      x={"x": train_data},
-      y=train_labels,
-      batch_size=128,
-      num_epochs=1,
-      shuffle=True)
-  
-  CARLnet_classifier.train(
-      input_fn=train_input_fn,
-      steps=None,
-      )
-
-  # Evaluate the model and print results
-  eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-      x={"x": eval_data},
-      y=eval_labels,
-      num_epochs=1,
-      shuffle=False)
-  eval_results = CARLnet_classifier.evaluate(input_fn=eval_input_fn)
-  print(eval_results)
-
-
-if __name__ == "__main__":
-  tf.app.run()
+def init_carlnet(model_dir):
+      CARLnet_classifier = tf.estimator.Estimator(
+      model_fn=CARLnet_fn, model_dir= model_dir)
+      
+      return CARLnet_classifier
