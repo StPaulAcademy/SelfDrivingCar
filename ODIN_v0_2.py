@@ -89,7 +89,7 @@ def ODINloss(logits, labels):
     return loss
     
 
-def ODIN_fn(features, labels, mode):
+def ODIN_fn(features, labels, mode, params):
   input_layer = tf.reshape(features["x"], [-1, 160, 160, 1])
   
   input_layer = tf.to_float(input_layer)
@@ -162,20 +162,16 @@ def ODIN_fn(features, labels, mode):
           name = "conv6_3x3")
   conv_6_flat = tf.reshape(conv_6, [-1, 512])
   fully_connected = tf.layers.dense(conv_6_flat, units=512, activation=tf.nn.relu)
-  dropout = tf.nn.dropout(fully_connected, 0.6)
+  dropout = tf.nn.dropout(fully_connected, params['dropout'])
   logits = tf.layers.dense(dropout, units=32, activation=tf.nn.sigmoid)
   print(tf.shape(logits))
   
   predictions = {
-      # Generate predictions (for PREDICT and EVAL mode)
-      #"classes": tf.argmax(input=logits, axis=1),
-      # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
-      # `logging_hook`.
-      "output array": logits
+      "ODIN_output": logits
   }
   
   if mode == tf.estimator.ModeKeys.PREDICT:
-    return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+    return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions, export_outputs = {'output': tf.estimator.export.PredictOutput(logits)})
 
   # Calculate Loss (for both TRAIN and EVAL modes)
   loss = ODINloss(logits, labels)
@@ -188,56 +184,9 @@ def ODIN_fn(features, labels, mode):
         global_step=tf.train.get_global_step())
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
-#  # Add evaluation metrics (for EVAL mode)
-#  eval_metric_ops = {
-#      "accuracy": tf.metrics.accuracy(
-#          labels=labels, predictions=predictions["classes"])}
-#  return tf.estimator.EstimatorSpec(
-#      mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
-
-def init_ODIN(model_name):
+def init_ODIN(model_name, dropout):
     model_dir = "/tmp/ODIN/" + model_name
-    ODIN = tf.estimator.Estimator(model_fn=ODIN_fn, model_dir = model_dir)
+    ODIN = tf.estimator.Estimator(model_fn=ODIN_fn, model_dir = model_dir, params = {'dropout': dropout})
     return ODIN
 
-def run():
-    ODIN_classifier = init_ODIN("model_2")
-    data = np.load('ODINdata.npy')
-    train = data
-    print(np.shape(train[0]), train.shape)
-  
-  
-    features = np.array([i[0] for i in train]).reshape(-1, 160, 160, 1)
-    labels = np.array([i[1] for i in train])
-  
-  
-    print(labels.shape)
-    print(np.shape(features))
-  
-    eval_data =  features[22:23]
-    eval_labels = labels[22:23]
- 
-#  ODIN_classifier.train(
-#      input_fn=train_input_fn,
-#      steps=None)
-
-  # Evaluate the model and print results
-#  eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-#      x={"x": eval_data},
-#      y=eval_labels,
-#      num_epochs=1,
-#      shuffle=False)
-#  eval_results = ODIN_classifier.evaluate(input_fn=eval_input_fn)
-#  print(eval_results)
-
-    predict_fn = tf.estimator.inputs.numpy_input_fn(
-        x = {"x": eval_data},
-        num_epochs = 1,
-        shuffle = False)
-    predict_result = ODIN_classifier.predict(input_fn=predict_fn)
-    print(eval_labels)
-    print(list(predict_result))
-
-
-run()

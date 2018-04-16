@@ -88,7 +88,9 @@ def ODINloss(logits, labels):
     
     tf.summary.scalar("Loss_term5", tf.reduce_mean(term5))
     
-    loss = term1 + term2 + term3 + term4 + term5
+#    loss = term1 + term2 + term3 + term4 + term5
+
+    loss = term1 + term2
 
     loss = tf.reduce_mean(loss)
     tf.summary.scalar("loss", loss)
@@ -183,12 +185,10 @@ def ODIN_fn(features, labels, mode):
   predictions = {"output":logits}
   
   if mode == tf.estimator.ModeKeys.PREDICT:
-    return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+    return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions, export_outputs = {'output': tf.estimator.export.PredictOutput(logits)})
 
-  # Calculate Loss (for both TRAIN and EVAL modes)
   loss = ODINloss(logits, labels)
 
-  # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
     optimizer = tf.train.MomentumOptimizer(learning_rate=0.001, momentum=0.9)
     train_op = optimizer.minimize(
@@ -196,66 +196,7 @@ def ODIN_fn(features, labels, mode):
         global_step=tf.train.get_global_step())
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
-#  # Add evaluation metrics (for EVAL mode)
-#  eval_metric_ops = {
-#      "accuracy": tf.metrics.accuracy(
-#          labels=labels, predictions=predictions["classes"])}
-#  return tf.estimator.EstimatorSpec(
-#      mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
-
-
-def main(unused_argv):
-  # Load training and eval data
-  data = np.load('ODINdata.npy')
-  train = data
-  print(np.shape(train[0]), train.shape)
-  
-  
-  features = np.array([i[0] for i in train]).reshape(-1, 160, 160, 1)
-  labels = np.array([i[1] for i in train])
-  
-  
-  print(labels.shape)
-  print(np.shape(features))
-  
-  
-  train_data =  features
-  train_labels = labels
-  eval_data =  features[22:23]
-  eval_labels = labels[22:23]
-
-  # Create the Estimator
-  ODIN_classifier = tf.estimator.Estimator(
-      model_fn=ODIN_fn, model_dir="/tmp/ODIN/sigmoid_2")
-
-  # Set up logging for predictions
-  # Log the values in the "Softmax" tensor with label "probabilities"
-#  tensors_to_log = {"probabilities": "logits"}
-#  logging_hook = tf.train.LoggingTensorHook(
-#      tensors=tensors_to_log, every_n_iter=50)
-
-  # Train the model
-  train_input_fn = tf.estimator.inputs.numpy_input_fn(
-      x={"x": train_data},
-      y=train_labels,
-      batch_size= 128,
-      num_epochs= 100,
-      shuffle=True)
-  
-#  ODIN_classifier.train(
-#      input_fn=train_input_fn,
-#      steps=None)
-
-  predict_fn = tf.estimator.inputs.numpy_input_fn(
-      x = {"x": eval_data},
-      num_epochs = 1,
-      shuffle = False)
-  predict_result = ODIN_classifier.predict(input_fn=predict_fn)
-  print(eval_labels)
-  print(list(predict_result))
-
-
-
-
-if __name__ == "__main__":
-  tf.app.run()
+def init_ODIN(model_name):
+    model_dir = "/tmp/ODIN/" + model_name
+    ODIN = tf.estimator.Estimator(model_fn=ODIN_fn, model_dir = model_dir)
+    return ODIN
