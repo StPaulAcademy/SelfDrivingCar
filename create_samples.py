@@ -7,8 +7,8 @@ import cv2
 import matplotlib.pyplot as plt
 from scipy import ndimage
 
-xcells = 10 #the number of cells to divide the image along the X axis
-ycells = 10 #the number of cells to divide the image along the Y axis
+xcells = 2 #the number of cells to divide the image along the X axis
+ycells = 2 #the number of cells to divide the image along the Y axis
 
 sign = cv2.imread('stopsign.png') #THIS SHOULD BE THE SIGN
 background = cv2.imread('background.jpg') #THIS SHOULD BE THE BACKGROUND
@@ -34,9 +34,8 @@ ycoord = y+h3/2
 xcenter = (xcoord-((xcoord//(w1/xcells))*xcells))/xcells
 ycenter = (ycoord-((ycoord//(h1/ycells))*ycells))/ycells
 
-#Quadrants are enumerated individually along the X and Y axis starting at (0,0) in the top left corner and (n,n) in th ebottom right corner
-xquadrant = xcoord//(w1/xcells)
-yquadrant = ycoord//(h1/xcells)
+#Quadrants are enumeraed from left to right starting at 0. The start of each new row picks up on where the last row ended
+quadrant = (xcoord//(w1/xcells))+(ycells*(ycoord//(h1/xcells)))
 
 background[y:y+h3, x:x+w3] = np.where(np.repeat(np.any(newsign > 0, axis=2), 3, axis=1).reshape(h3, w3, 3), newsign, background[y:y+h3, x:x+w3])
 
@@ -46,8 +45,7 @@ print('\n')
 print('Global X coordinate of center: ' + str(xcoord))
 print('Global Y coordinate of center: ' + str(ycoord))
 print('\n')
-print('Quadrant on X axis: ' + str(xquadrant))
-print('Quadrant on Y axis: ' + str(yquadrant))
+print('Quadrant: ' + str(quadrant))
 print('\n')
 print('X coordinate at center: ' + str(xcenter))
 print('Y coordinate at center: ' + str(ycenter))
