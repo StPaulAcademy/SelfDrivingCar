@@ -53,8 +53,8 @@ print('\n')
 print('Width from center : ' + str(w3/2))
 print('Height from center : ' + str(h3/2))
 
-background[ycoord:ycoord+3, xcoord:xcoord+3] = [255,0,0]
-background[ycoord:3+ycoord, xcoord+w3/2:3+xcoord+w3/2] = [255,0,0]
+'''UNCOMMENT THIS TO SEE A BOUNDING BOX'''
+#cv2.rectangle(background, (int(xcoord-w3/2), int(ycoord-h3/2)), (int(xcoord+w3/2), int(ycoord+h3/2)), (255,0,0), 2)
 
 cv2.imshow('', background)
 cv2.waitKey(0)
