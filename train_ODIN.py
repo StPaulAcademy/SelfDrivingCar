@@ -12,15 +12,15 @@ import numpy as np
 
 def main(unused_argv):
     
-#    ODIN = ODIN_v0_2.init_ODIN("model_2", 0.5)
+#    ODIN = ODIN_v0_2.init_ODIN("model_3", 0.5)
     ODIN = ODINv1.init_ODIN("model_1")
     # Load training and eval data
-    data = np.load('ODINdata.npy')
+    data = np.load('ODIN_data.npy')
     train = data
     print(np.shape(train[0]), train.shape)
   
   
-    features = np.array([i[0] for i in train]).reshape(-1, 160, 160, 1)
+    features = np.array([i[0] for i in train]).reshape(-1, 160, 160, 3)
     labels = np.array([i[1] for i in train])
   
   
@@ -30,8 +30,7 @@ def main(unused_argv):
   
     train_data =  features
     train_labels = labels
-    eval_data =  features[22:23]
-    eval_labels = labels[22:23]
+
 
   # Set up logging for predictions
   # Log the values in the "Softmax" tensor with label "probabilities"
@@ -44,7 +43,7 @@ def main(unused_argv):
         x={"x": train_data},
         y=train_labels,
         batch_size= 128,
-        num_epochs= 100,
+        num_epochs= 200,
         shuffle=True)
   
     ODIN.train(

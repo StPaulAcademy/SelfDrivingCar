@@ -72,7 +72,7 @@ def ODINloss(logits, labels):
     k = 0
     for i in range(0,2):
         for j in range(0,2):
-            term4 += ((-1 * labels[:, k, 0]) + 1) * (logits[:, i, j, 0] - IOU(logits[:, i, j, 1], logits[:, i, j, 2], logits[:, i, j, 3], logits[:, i, j, 4], labels[:, k, 1], labels[:, k, 2], labels[:, k, 3], labels[:, k, 4]))
+            term4 += ((-1 * labels[:, k, 0]) + 1) * (logits[:, i, j, 0] - 1)#IOU(logits[:, i, j, 1], logits[:, i, j, 2], logits[:, i, j, 3], logits[:, i, j, 4], labels[:, k, 1], labels[:, k, 2], labels[:, k, 3], labels[:, k, 4]))
             k += 1
     term4 = term4 * 0.5
     
@@ -98,7 +98,7 @@ def ODINloss(logits, labels):
     
 
 def ODIN_fn(features, labels, mode):
-  input_layer = tf.reshape(features["x"], [-1, 160, 160, 1])
+  input_layer = tf.reshape(features["x"], [-1, 160, 160, 3])
   
   input_layer = tf.to_float(input_layer)
   

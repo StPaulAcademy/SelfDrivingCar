@@ -90,7 +90,7 @@ def ODINloss(logits, labels):
     
 
 def ODIN_fn(features, labels, mode, params):
-  input_layer = tf.reshape(features["x"], [-1, 160, 160, 1])
+  input_layer = tf.reshape(features["x"], [-1, 160, 160, 3])
   
   input_layer = tf.to_float(input_layer)
   
