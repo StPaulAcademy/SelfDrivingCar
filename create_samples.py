@@ -9,22 +9,22 @@ from scipy import ndimage
 xcells = 2 #the number of cells to divide the image along the X axis
 ycells = 2 #the number of cells to divide the image along the Y axis
 
-sign = cv2.imread('stopsign.png') #THIS SHOULD BE THE SIGN
-background = cv2.imread('background.jpg') #THIS SHOULD BE THE BACKGROUND
-
+sign = cv2.imread('Stop_sign.png') #THIS SHOULD BE THE SIGN
+background = cv2.imread('car_1.jpg') #THIS SHOULD BE THE BACKGROUND
+background = cv2.resize(background, (160,160))
 h1, w1 = background.shape[:2]
 r = random.randint(-25, 25)
 
 #newsign = ndimage.rotate(sign, angle = -r)
 h2, w2 = sign.shape[:2]
 scalefactor = int(min(h1, w1)/max(h2, w2)*100)
-scale = random.randint(scalefactor-50, scalefactor-10)/100
+scale = random.randint(scalefactor-60, scalefactor-40)/100
 newsign = cv2.resize(sign, (0,0), fx=scale, fy=scale)
 h3, w3 = newsign.shape[:2]
 newsign = ndimage.rotate(newsign, reshape = True, angle = -r)
 
 h4, w4 = newsign.shape[:2]
-
+print(w1, h1, w4, h4)
 x = random.randint(0, w1-w4)
 y = random.randint(0, h1-h4)
 
@@ -50,12 +50,12 @@ print('\n')
 print('X coordinate at center: ' + str(xcenter))
 print('Y coordinate at center: ' + str(ycenter))
 print('\n')
-print('Width from center : ' + str(w4))
-print('Height from center : ' + str(h4))
+print('Width : ' + str(w4))
+print('Height : ' + str(h4))
 
 '''UNCOMMENT THIS TO SEE A BOUNDING BOX'''
 cv2.rectangle(background, (int(xcoord-w4/2), int(ycoord-h4/2)), (int(xcoord+w4/2), int(ycoord+h4/2)), (255,0,0), 2)
 
-cv2.imshow('', background)
+cv2.imshow('a', background)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
