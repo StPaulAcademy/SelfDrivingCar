@@ -13,7 +13,7 @@ import ODIN as ODINv1
 
 
 #ODIN = ODIN_v0_2.init_ODIN("model_2", 1)
-ODIN = ODINv1.init_ODIN("model_1")
+ODIN = ODINv1.init_ODIN("model_2")
 
 
 def serving_input_reciever_fn():

@@ -63,7 +63,7 @@ def ODINloss(logits, labels):
     k = 0
     for i in range(0,2):
         for j in range(0,2):
-            term3 += labels[:, k, 0] * (logits[:, i, j, 0] - IOU(logits[:, i, j, 1], logits[:, i, j, 2], logits[:, i, j, 3], logits[:, i, j, 4], labels[:, k, 1], labels[:, k, 2], labels[:, k, 3], labels[:, k, 4]))
+            term3 += labels[:, k, 0] * (logits[:, i, j, 0] - 1)**2#IOU(logits[:, i, j, 1], logits[:, i, j, 2], logits[:, i, j, 3], logits[:, i, j, 4], labels[:, k, 1], labels[:, k, 2], labels[:, k, 3], labels[:, k, 4]))
             k += 1
     
     tf.summary.scalar("Loss_term3", tf.reduce_mean(term3))
@@ -72,7 +72,7 @@ def ODINloss(logits, labels):
     k = 0
     for i in range(0,2):
         for j in range(0,2):
-            term4 += ((-1 * labels[:, k, 0]) + 1) * (logits[:, i, j, 0] - 1)#IOU(logits[:, i, j, 1], logits[:, i, j, 2], logits[:, i, j, 3], logits[:, i, j, 4], labels[:, k, 1], labels[:, k, 2], labels[:, k, 3], labels[:, k, 4]))
+            term4 += ((-1 * labels[:, k, 0]) + 1) * (logits[:, i, j, 0])**2#IOU(logits[:, i, j, 1], logits[:, i, j, 2], logits[:, i, j, 3], logits[:, i, j, 4], labels[:, k, 1], labels[:, k, 2], labels[:, k, 3], labels[:, k, 4]))
             k += 1
     term4 = term4 * 0.5
     
@@ -88,9 +88,9 @@ def ODINloss(logits, labels):
     
     tf.summary.scalar("Loss_term5", tf.reduce_mean(term5))
     
-#    loss = term1 + term2 + term3 + term4 + term5
+    loss = term1 + term2 + term3 + term4 #+ term5
 
-    loss = term1 + term2
+#    loss = term1 + term2
 
     loss = tf.reduce_mean(loss)
     tf.summary.scalar("loss", loss)

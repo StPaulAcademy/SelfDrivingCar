@@ -13,7 +13,7 @@ import numpy as np
 def main(unused_argv):
     
 #    ODIN = ODIN_v0_2.init_ODIN("model_3", 0.5)
-    ODIN = ODINv1.init_ODIN("model_1")
+    ODIN = ODINv1.init_ODIN("model_2")
     # Load training and eval data
     data = np.load('ODIN_data.npy')
     train = data

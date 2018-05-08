@@ -10,6 +10,7 @@ import tensorflow as tf
 import numpy as np
 import cv2
 import time
+import random
 
 
 export_dir = '/home/michael/Documents/ODIN/1525655894'
@@ -52,6 +53,8 @@ def predict_img(img_num):
     predict_result = predict_fn({'x': eval_data})
     predict_result = predict_result['output'][0].reshape((2,2,8))
     
+    eval_data[0, :, :, :] = cv2.cvtColor(eval_data[0,:,:,:], cv2.COLOR_YUV2BGR)
+    
     x_offset = 0
     y_offset = -80
     q = 0
@@ -63,22 +66,42 @@ def predict_img(img_num):
             y1 = int((predict_result[i][j][2]*80 + y_offset) - (160*predict_result[i][j][4])/2)
             x2 = int((predict_result[i][j][1]*80 + x_offset) + (160*predict_result[i][j][3])/2)
             y2 = int((predict_result[i][j][2]*80 + y_offset) + (160*predict_result[i][j][4])/2)
-            if eval_labels[q][0] != 0.0:
+
+            '''SHOWING HIGH CONFIDENCE PREDICTIONS'''
+            if predict_result[i][j][0] > .56:
                 ex1 = int(eval_labels[q][1] * 80 + x_offset - eval_labels[q][3] * 80)
                 ey1 = int(eval_labels[q][2] * 80 + y_offset - eval_labels[q][4] * 80)
                 ex2 = int(eval_labels[q][1] * 80 + x_offset + eval_labels[q][3] * 80)
                 ey2 = int(eval_labels[q][2] * 80 + y_offset + eval_labels[q][4] * 80)
                 cv2.rectangle(eval_data[0,:,:,:], (x1, y1), (x2, y2), colors[i][j], 2)
-                cv2.rectangle(eval_data[0,:,:,:], (ex1, ey1), (ex2, ey2), (255, 255, 255), 2)
+                cv2.rectangle(eval_data[0,:,:,:], (ex1, ey1), (ex2, ey2), (0,0,0), 2)
 #                print(x1, y1, x2, y2)
 #                print(ex1, ey1, ex2, ey2)
                 print(IOU(x1, y1, x2, y2, ex1, ey1, ex2, ey2))
             x_offset += 80
             q += 1
-    cv2.imshow('a', cv2.cvtColor(eval_data[0,:,:,:], cv2.COLOR_YUV2BGR))    
+
+            '''TESTING AVERAGE IOU OVER A DATA SET'''
+#            if eval_labels[q][0] == 1:
+#                ex1 = int(eval_labels[q][1] * 80 + x_offset - eval_labels[q][3] * 80)
+#                ey1 = int(eval_labels[q][2] * 80 + y_offset - eval_labels[q][4] * 80)
+#                ex2 = int(eval_labels[q][1] * 80 + x_offset + eval_labels[q][3] * 80)
+#                ey2 = int(eval_labels[q][2] * 80 + y_offset + eval_labels[q][4] * 80)
+#                cv2.rectangle(eval_data[0,:,:,:], (x1, y1), (x2, y2), colors[i][j], 2)
+#                cv2.rectangle(eval_data[0,:,:,:], (ex1, ey1), (ex2, ey2), (0,0,0), 2)
+##                print(x1, y1, x2, y2)
+##                print(ex1, ey1, ex2, ey2)
+#                print(IOU(x1, y1, x2, y2, ex1, ey1, ex2, ey2))
+#                return IOU(x1, y1, x2, y2, ex1, ey1, ex2, ey2)
+#            x_offset += 80
+#            q += 1
+            
+    print('prediction time: ' + str(time.time()-t))
+    cv2.imshow('a', eval_data[0,:,:,:])    
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    print('prediction time: ' + str(time.time()-t))
+    
+    
     return IOU(x1, y1, x2, y2, ex1, ey1, ex2, ey2)
 
 
@@ -89,6 +112,6 @@ avg = None
 #        avg = predict_img(i)
 #    else:
 #        avg = (predict_img(i) + avg)/2
-#print(avg)
-print(len(data))
-predict_img(749)
+#print("average:  " + str(avg)
+#%%
+predict_img(random.randint(0,750))
